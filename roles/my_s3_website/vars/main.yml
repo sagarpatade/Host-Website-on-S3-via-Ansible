@@ -1,0 +1,3 @@
+---
+bucket_name: "sagar-day16-static-website-{{ 1000 | random }}"
+aws_region: "us-east-1"

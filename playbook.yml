@@ -1,0 +1,7 @@
+---
+- name: Deploy S3 Static Website
+  hosts: localhost
+  gather_facts: false
+
+  roles:
+    - my_s3_website

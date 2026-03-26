@@ -1,0 +1,44 @@
+---
+- name: Create S3 bucket and allow public access
+  amazon.aws.s3_bucket:
+    name: "{{ bucket_name }}"
+    region: "{{ aws_region }}"
+    state: present
+    public_access:
+      block_public_acls: false
+      ignore_public_acls: false
+      block_public_policy: false
+      restrict_public_buckets: false
+
+- name: Configure bucket for static website hosting
+  amazon.aws.s3_website:
+    name: "{{ bucket_name }}"
+    state: present
+    index_document: index.html
+
+- name: Apply public read policy to the bucket
+  amazon.aws.s3_bucket:
+    name: "{{ bucket_name }}"
+    policy: >
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "PublicReadGetObject",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::{{ bucket_name }}/*"
+          }
+        ]
+      }
+
+- name: Sync HTML files to S3
+  amazon.aws.s3_sync:
+    bucket: "{{ bucket_name }}"
+    file_root: "{{ role_path }}/files/"
+    permission: public-read
+
+- name: Output the live website URL
+  debug:
+    msg: "Your website is live at: http://{{ bucket_name }}.s3-website-{{ aws_region }}.amazonaws.com"
